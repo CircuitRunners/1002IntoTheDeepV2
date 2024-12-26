@@ -1,6 +1,6 @@
-package ftc1002.config.subsystems;
+// Archive
 
-import static ftc1002.config.util.RobotConstants.*;
+package ftc1002.config.subsystems.Folder;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -14,10 +14,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-import ftc1002.config.util.RobotConstants;
-import ftc1002.config.util.action.RunAction;
-
-public class pivotLift {
+public class pivotLiftArchive {
     private Telemetry telemetry;
     public DcMotorEx rightLift, leftLift, pivot;
     public AnalogInput pivotEncoder;
@@ -27,11 +24,15 @@ public class pivotLift {
     public int pos, bottom;
     public int pivotStart = 10;
     public PIDController liftPID, pivotPID;
-    public static int liftTarget, pivotTarget;
-    public static double liftKP = 0.02, liftKI = 0.0, liftKD = 0.001, liftKF = 0.0;
-    public static double pivotKP = 0.02, pivotKI = 0.0, pivotKD = 0.001;
+    public static int liftTarget=0, pivotTarget=0;
+    public static double liftKP = 0.003, liftKI = 0.0, liftKD = 0, liftKF = 0.15;
+    public static double pivotKP = 0.02, pivotKI = 0.0, pivotKD = 0.001, pivotKf;
+    public static double min_extension = 0.0;
+    public static double max_extension = 35000;
+    public static double min_feedforward = 0.05;
+    public static double max_feedforward = 0.1;
 
-    public pivotLift(HardwareMap hardwareMap, Telemetry telemetry) {
+    public pivotLiftArchive(HardwareMap hardwareMap, Telemetry telemetry) {
         this.telemetry = telemetry;
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
@@ -40,12 +41,16 @@ public class pivotLift {
         pivot = hardwareMap.get(DcMotorEx.class, "pivot");
         pivotEncoder = hardwareMap.get(AnalogInput.class, "pivot_enc");
 
-        rightLift.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightLift.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftLift.setDirection(DcMotorSimple.Direction.FORWARD);
         rightLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         pivot.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        leftLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
 
         liftPID = new PIDController(liftKP, liftKI, liftKD);
         pivotPID = new PIDController(pivotKP, pivotKI, pivotKD);
@@ -60,10 +65,10 @@ public class pivotLift {
 
             double pid = liftPID.calculate(getLiftPos(), liftTarget);
             double ff = liftKF * Math.sin(Math.toRadians(getPivotAngle()));
-            double power = pid + ff;
+            double power = (pid + ff) / 12.75 * 12;
 
-            rightLift.setPower(power);
-            leftLift.setPower(power);
+            rightLift.setPower(-1 * power);
+            leftLift.setPower(-1 * power);
 
             telemetry.addData("lift pos", getLiftPos());
             telemetry.addData("lift target", liftTarget);
@@ -78,8 +83,9 @@ public class pivotLift {
             if (getPivotAngle() > 90) {
                 ff = linearlyScaledFF() * Math.cos(Math.toRadians(getPivotAngle()-90));
             } else {
-                ff = linearlyScaledFF() * Math.cos(Math.toRadians(90-getPivotAngle()));
+                ff = -1 * linearlyScaledFF() * Math.cos(Math.toRadians(90-getPivotAngle()));
             }
+            pivotKf = ff;
             double power = pid + ff;
 
             pivot.setPower(power);
@@ -112,7 +118,7 @@ public class pivotLift {
 
     public void manualPivot(double n) {
         manualPivot = true;
-        pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         pivot.setPower(n);
     }
 
@@ -152,16 +158,14 @@ public class pivotLift {
 
     public int getPivotAngle() {
         // round to the nearest degree
-        return (int) Math.round(pivotEncoder.getVoltage() / 3.2 * 360);
+        return (int) Math.round(pivotEncoder.getVoltage() / 3.2 * 360) - 185;
     }
 
+
     public double linearlyScaledFF() {
-        double min_extension = 0.0;
-        double max_extension = 100.0;
-        double min_feedforward = 0.05;
-        double max_feedforward = 0.1;
         return (max_feedforward - min_feedforward) / (max_extension - min_extension) * (getLiftPos() - min_extension) + min_feedforward;
     }
+
     // OpMode
     public void init() {
         liftPID.setPID(liftKP, liftKI, liftKD);

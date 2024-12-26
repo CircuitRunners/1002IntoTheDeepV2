@@ -1,4 +1,4 @@
-package ftc1002.opmode;
+package ftc1002.opmode.Auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;

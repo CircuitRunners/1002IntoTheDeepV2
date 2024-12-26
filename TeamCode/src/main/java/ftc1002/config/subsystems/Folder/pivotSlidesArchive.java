@@ -1,4 +1,4 @@
-package ftc1002.config.subsystems;
+package ftc1002.config.subsystems.Folder;
 
 import com.arcrobotics.ftclib.controller.PIDController;
 
@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class pivotSlides {
+public class pivotSlidesArchive {
     // Hardware
     private final DcMotorEx pivotMotor;
     private final DcMotorEx extensionMotorLeft;
@@ -34,7 +34,7 @@ public class pivotSlides {
     private boolean zeroing = false;
 
 
-    public pivotSlides(HardwareMap hardwareMap, Gamepad gamepad) {
+    public pivotSlidesArchive(HardwareMap hardwareMap, Gamepad gamepad) {
         pivotMotor = hardwareMap.get(DcMotorEx.class, "pivot");
         pivotMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 

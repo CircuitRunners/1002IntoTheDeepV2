@@ -1,4 +1,4 @@
-package ftc1002.opmode;
+package ftc1002.opmode.Tuners;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
