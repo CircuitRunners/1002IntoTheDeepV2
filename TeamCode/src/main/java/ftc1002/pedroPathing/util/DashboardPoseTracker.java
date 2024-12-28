@@ -1,6 +1,9 @@
 package ftc1002.pedroPathing.util;
 
+import ftc1002.pedroPathing.follower.Follower;
 import ftc1002.pedroPathing.localization.PoseUpdater;
+
+import java.util.ArrayList;
 
 /**
  * This is the DashboardPoseTracker class. This tracks the pose history of the robot through a

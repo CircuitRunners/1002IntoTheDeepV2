@@ -64,12 +64,13 @@ public class Teleop extends OpMode{
         telemetry.addData("digital 0", pin0.getState());
         telemetry.addData("digital 1", pin1.getState());
         telemetry.update();
+
     }
 
     public void configurePinpoint() {
-        pinpoint.setOffsets(-84.0, -168.0); //these are tuned for 3110-0002-0001 Product Insight #1
+        pinpoint.setOffsets(153.22873, -68.86620); //these are tuned for 3110-0002-0001 Product Insight #1
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
         pinpoint.resetPosAndIMU();
     }
 

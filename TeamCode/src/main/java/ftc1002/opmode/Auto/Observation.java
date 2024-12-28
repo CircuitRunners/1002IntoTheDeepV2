@@ -2,7 +2,6 @@ package ftc1002.opmode.Auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-
 import ftc1002.pedroPathing.follower.Follower;
 import ftc1002.config.runmodes.Auto;
 import ftc1002.pedroPathing.util.Timer;

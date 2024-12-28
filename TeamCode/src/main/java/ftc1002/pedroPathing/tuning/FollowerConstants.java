@@ -1,6 +1,7 @@
 package ftc1002.pedroPathing.tuning;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import ftc1002.pedroPathing.pathGeneration.MathFunctions;
 import ftc1002.pedroPathing.pathGeneration.Point;
@@ -23,24 +24,29 @@ import ftc1002.pedroPathing.util.KalmanFilterParameters;
 public class FollowerConstants {
 
     // This section is for configuring your motors
-    public static String leftFrontMotorName = "leftFront";
-    public static String leftRearMotorName = "leftRear";
-    public static String rightFrontMotorName = "rightFront";
-    public static String rightRearMotorName = "rightRear";
+    public static String leftFrontMotorName = "fl";
+    public static String leftRearMotorName = "bl";
+    public static String rightFrontMotorName = "fr";
+    public static String rightRearMotorName = "br";
+
+    public static DcMotorSimple.Direction leftFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
+    public static DcMotorSimple.Direction rightFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
+    public static DcMotorSimple.Direction leftRearMotorDirection = DcMotorSimple.Direction.REVERSE;
+    public static DcMotorSimple.Direction rightRearMotorDirection = DcMotorSimple.Direction.FORWARD;
 
     // This section is for setting the actual drive vector for the front left wheel, if the robot
     // is facing a heading of 0 radians with the wheel centered at (0,0)
-    private static double xMovement = 81.34056;
-    private static double yMovement = 65.43028;
+    private static double xMovement = 78.57050876;
+    private static double yMovement = 63.9792;
     private static double[] convertToPolar = Point.cartesianToPolar(xMovement, -yMovement);
     public static Vector frontLeftVector = MathFunctions.normalizeVector(new Vector(convertToPolar[0], convertToPolar[1]));
 
 
     // Translational PIDF coefficients (don't use integral)
     public static CustomPIDFCoefficients translationalPIDFCoefficients = new CustomPIDFCoefficients(
-            0.1,
+            0.05,
             0,
-            0,
+            0.0001,
             0);
 
     // Translational Integral
@@ -56,9 +62,9 @@ public class FollowerConstants {
 
     // Heading error PIDF coefficients
     public static CustomPIDFCoefficients headingPIDFCoefficients = new CustomPIDFCoefficients(
-            1,
+            2,
             0,
-            0,
+            0.15,
             0);
 
     // Feed forward constant added on to the heading PIDF
@@ -67,9 +73,9 @@ public class FollowerConstants {
 
     // Drive PIDF coefficients
     public static CustomFilteredPIDFCoefficients drivePIDFCoefficients = new CustomFilteredPIDFCoefficients(
-            0.025,
+            0.01,
             0,
-            0.00001,
+            0.0002,
             0.6,
             0);
 
@@ -83,7 +89,7 @@ public class FollowerConstants {
 
 
     // Mass of robot in kilograms
-    public static double mass = 10.65942;
+    public static double mass = 10.75;
 
     // Centripetal force to power scaling
     public static double centripetalScaling = 0.0005;
@@ -91,11 +97,11 @@ public class FollowerConstants {
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
-    public static double forwardZeroPowerAcceleration = -34.62719;
+    public static double forwardZeroPowerAcceleration = -32.9877;
 
     // Acceleration of the drivetrain when power is cut in inches/second^2 (should be negative)
     // if not negative, then the robot thinks that its going to go faster under 0 power
-    public static double lateralZeroPowerAcceleration = -78.15554;
+    public static double lateralZeroPowerAcceleration = -63.8118;
 
     // A multiplier for the zero power acceleration to change the speed the robot decelerates at
     // the end of paths.
@@ -115,7 +121,7 @@ public class FollowerConstants {
     // When the robot is at the end of its current Path or PathChain and the translational error
     // goes below this value, then end the Path. This is in inches.
     // This can be custom set for each Path.
-    public static double pathEndTranslationalConstraint = 0.1;
+    public static double pathEndTranslationalConstraint = 0.95;
 
     // When the robot is at the end of its current Path or PathChain and the heading error goes
     // below this value, then end the Path. This is in radians.
@@ -130,7 +136,7 @@ public class FollowerConstants {
     // When the Path is considered at its end parametrically, then the Follower has this many
     // milliseconds to further correct by default.
     // This can be custom set for each Path.
-    public static double pathEndTimeoutConstraint = 500;
+    public static double pathEndTimeoutConstraint = 50;
 
     // This is how many steps the BezierCurve class uses to approximate the length of a BezierCurve.
     public static int APPROXIMATION_STEPS = 1000;

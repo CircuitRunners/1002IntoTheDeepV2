@@ -13,8 +13,11 @@ public class pivotExtensionTuner  extends OpMode {
 
     @Override
     public void init() {
-        pivotExtension = new pivotExtension(hardwareMap, telemetry);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        pivotExtension = new pivotExtension(hardwareMap, telemetry);
+        telemetry.addLine("PivotLiftTuner Initialized.");
+        telemetry.addLine("Press START to begin.");
+        telemetry.update();
     }
 
     @Override
