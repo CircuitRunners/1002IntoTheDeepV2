@@ -3,18 +3,18 @@ package ftc1002.opmode.Tuners;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import ftc1002.config.subsystems.endEffector;
+import ftc1002.config.subsystems.EndEffector;
 
 @TeleOp(name = "Servo Tester", group = "Test")
 public class servoTester extends OpMode{
-    private endEffector endEffector;
+    private EndEffector endEffector;
     private int servoIndex = 0;
 
     public void init() {
         telemetry.addLine("Initializing...");
         telemetry.update();
 
-        endEffector = new endEffector(hardwareMap);
+        endEffector = new EndEffector(hardwareMap);
 
         telemetry.addLine();
         telemetry.update();
