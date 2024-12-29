@@ -45,16 +45,22 @@ public class EndEffector {
     }
 
     public void preSubPickup() {
-        setPositions(0.8, 1, 0.5);
+        setPositions(0.75, 1, 0.5);
     }
 
     public void subPickup() {
-        setPositions(0.86, 0.98, 0.5);
+        setPositions(0.86, 0.98, wristPosition);
     }
 
     public void obsDeposit() {
         setPositions(0.2, 0.7, 0.5);
     }
+
+    public void wallIntake(){
+        setPositions(0.5,0.5,0.5);
+    }
+
+
 
     public void clawOpen() {
         clawPosition = 0.7;
@@ -63,6 +69,11 @@ public class EndEffector {
     public void clawClose() {
         clawPosition = 0.3;
     }
+
+    public void wristincrement() {wristPosition += 0.02;}
+    public void wristdecrement() {wristPosition -= 0.02;}
+    public void pivotincrement() {pivotPosition += 0.02;}
+    public void pivotdecrement() {pivotPosition -= 0.02;}
 
     // write an update method that sets all the positions for the servo
     public void update() {
@@ -85,4 +96,6 @@ public class EndEffector {
         wristPosition = wristPos;
         pivotPosition = pivotPos;
     }
+
+
 }

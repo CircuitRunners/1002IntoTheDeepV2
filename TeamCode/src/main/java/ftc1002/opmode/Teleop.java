@@ -82,6 +82,10 @@ public class Teleop extends OpMode{
             sequenceState = (sequenceState + 1) % 7; // Advance to the next state (wraps back to 0)
         }
 
+        if (gamepad1.dpad_down) {
+            sequenceState = (sequenceState - 1) % 7;
+        }
+
         if (!gamepad1.dpad_up) {
             dpadUpReleased = true;
         }
@@ -94,6 +98,21 @@ public class Teleop extends OpMode{
             endEffector.clawClose();
         }
 
+        if (PivotExtension.pivotTarget > 45) {
+            if (gamepad1.left_trigger > 0.5) {
+                endEffector.pivotdecrement();
+            } else if (gamepad1.right_trigger > 0.5) {
+                endEffector.pivotincrement();
+            }
+        }
+        else {
+            if (gamepad1.left_trigger > 0.5) {
+                endEffector.wristdecrement();
+            } else if (gamepad1.right_trigger > 0.5) {
+                endEffector.wristincrement();
+            }
+        }
+
         // State machine for manual control
         switch (sequenceState) {
             case 0: // Set pivot to 12, extension to 50, arm idle, claw opens
@@ -104,7 +123,7 @@ public class Teleop extends OpMode{
                 break;
 
             case 1: // Send lift to 500
-                PivotExtension.liftTarget = 500;
+                PivotExtension.liftTarget = 400;
                 if (slides.isAtTarget(400)) {
                     endEffector.preSubPickup();
                 }
