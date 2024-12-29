@@ -33,7 +33,7 @@ public class Teleop extends OpMode{
     @Override
     public void init() {
         drive = new MecanumDrive();
-        slides = new PivotExtension(hardwareMap, telemetry);
+        slides = new PivotExtension(hardwareMap, telemetry, false);
         endEffector = new EndEffector(hardwareMap);
 
         endEffector.idle();
@@ -104,14 +104,16 @@ public class Teleop extends OpMode{
             } else if (gamepad1.right_trigger > 0.5) {
                 endEffector.pivotincrement();
             }
-        }
-        else {
+        } else {
             if (gamepad1.left_trigger > 0.5) {
                 endEffector.wristdecrement();
             } else if (gamepad1.right_trigger > 0.5) {
                 endEffector.wristincrement();
             }
         }
+
+
+
 
         // State machine for manual control
         switch (sequenceState) {
@@ -127,6 +129,12 @@ public class Teleop extends OpMode{
                 if (slides.isAtTarget(400)) {
                     endEffector.preSubPickup();
                 }
+
+//                if (gamepad1.left_trigger > 0.5) {
+//                    endEffector.wristdecrement();
+//                } else if (gamepad1.right_trigger > 0.5) {
+//                    endEffector.wristincrement();
+//                }
                 break;
             case 2: // Call subPickup and close claw
                 endEffector.subPickup();
@@ -140,10 +148,12 @@ public class Teleop extends OpMode{
             case 4:
                 PivotExtension.liftTarget = 40;
                 PivotExtension.pivotTarget = 90;
+                if (slides.isAtTarget(900)) {
+                    endEffector.bucketScore();
+                }
                 break;
             case 5: // Lift to 850
                 PivotExtension.liftTarget = 1015;
-                endEffector.bucketScore();
                 break;
             case 6:
                 PivotExtension.liftTarget = 50;

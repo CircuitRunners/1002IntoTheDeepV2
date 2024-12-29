@@ -41,11 +41,11 @@ public class EndEffector {
         setPositions(0.8, 0.5, 0.5);
     }
     public void bucketScore() {
-        setPositions(0.8, 0.4, 0.5);
+        setPositions(0.8, 0.4, pivotPosition);
     }
 
     public void preSubPickup() {
-        setPositions(0.75, 1, 0.5);
+       setPositions(0.75, 1, wristPosition);
     }
 
     public void subPickup() {
@@ -53,7 +53,7 @@ public class EndEffector {
     }
 
     public void obsDeposit() {
-        setPositions(0.2, 0.7, 0.5);
+        setPositions(0.2, 0.7, pivotPosition);
     }
 
     public void wallIntake(){

@@ -16,15 +16,17 @@ public class PivotExtension {
     public AnalogInput pivotEncoder;
     private PIDController liftController, pivotController;
     public static int liftTarget=0, pivotTarget=0;
-    public static double liftKP = 0.02, liftKI = 0.0, liftKD = 0.00035, liftKF = 0.15;
-    public static double pivotKP = 0.01, pivotKI = 0, pivotKD = 0.0007, pivotKf=0.5;
+    public static double teleopLiftKP = 0.02, teleopLiftKI = 0.0, teleopLiftKD = 0.00035, teleopLiftKF = 0.15;
+    public static double teleopPivotKP = 0.01, teleopPivotKI = 0, teleopPivotKD = 0.0007, teleopPivotKF =0.5;
+    public static double autoliftKP = 0.02, autoLiftKI = 0.0, autoLiftKD = 0.00035, autoLiftKF = 0.15;
+    public static double autoPivotKP = 0.01, autoPivotKI = 0, autoPivotKD = 0.0007, autoPivotKf=0.5;
     public static int liftMax = 1000;
     public static int offset = 24;
     public static int deadband = 15;
 
-    public PivotExtension(HardwareMap hardwareMap, Telemetry telemetry) {
-        liftController = new PIDController(liftKP, liftKI, liftKD);
-        pivotController = new PIDController(pivotKP, pivotKI, pivotKD);
+    public PivotExtension(HardwareMap hardwareMap, Telemetry telemetry, boolean isAuto) {
+        liftController = isAuto ? new PIDController(autoliftKP,autoLiftKI,autoLiftKD) : new PIDController(teleopLiftKP, teleopLiftKI, teleopLiftKD);
+        pivotController = isAuto? new PIDController(autoPivotKP,autoPivotKI,autoPivotKD) : new PIDController(teleopPivotKP, teleopPivotKI, teleopPivotKD);
         this.telemetry = telemetry;
 
         rightLift = hardwareMap.get(DcMotorEx.class, "rightLift");
@@ -54,9 +56,9 @@ public class PivotExtension {
         double liftPID;
         double pivotPID;
 
-        liftController.setPID(liftKP, liftKI, liftKD);
+        liftController.setPID(teleopLiftKP, teleopLiftKI, teleopLiftKD);
         liftController.setTolerance(deadband);
-        pivotController.setPID(pivotKP, pivotKI, pivotKD);
+        pivotController.setPID(teleopPivotKP, teleopPivotKI, teleopPivotKD);
         pivotController.setTolerance(2);
 
         int liftPos = Math.round((float) rightLift.getCurrentPosition() / 42) * -1;
@@ -77,8 +79,8 @@ public class PivotExtension {
 
         // double pivotPID = square_root(pivotController.calculate(pivotPos, pivotTarget));
 
-        double liftFF = liftKF * Math.sin(Math.toRadians(pivotPos));
-        double pivotFF = pivotKf * Math.cos(Math.toRadians(pivotPos)) * ((double) liftPos / liftMax);
+        double liftFF = teleopLiftKF * Math.sin(Math.toRadians(pivotPos));
+        double pivotFF = teleopPivotKF * Math.cos(Math.toRadians(pivotPos)) * ((double) liftPos / liftMax);
 
         double liftPower = liftPID + liftFF;
         double pivotPower = pivotPID + pivotFF;
