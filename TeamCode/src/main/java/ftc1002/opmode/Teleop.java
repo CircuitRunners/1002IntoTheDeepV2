@@ -117,11 +117,16 @@ public class Teleop extends OpMode {
 //                // slides.setPosition(transfer)
 //                endEffector.transfer();
 //
-//                if (gamepad2.dpad_up) {
+//                if (gamepad2.dpad_up && endEffector.getArmPosition() == 0) {
 //                    endEffector.scoreBucket();
 //                    //slides.scoreBucket
+//                }
+//               else if (gamepad2.dpad_up ) {
+//                    // slides.setPosition(transfer)
+//                    endEffector.transfer();
+//                }
 //
-//                } else if (gamepad2.dpad_down  /*&&slides.getPosition == slides.scoreBucket*/) {
+//                if (gamepad2.dpad_down  /*&&slides.getPosition == slides.scoreBucket*/) {
 //                    endEffector.openClaw();
 //                    //slides.transfer
 //                    endEffector.transfer();
@@ -130,6 +135,14 @@ public class Teleop extends OpMode {
 //                }
 //                if (gamepad2.dpad_left || gamepad2.dpad_right) {
 //                    pivotState = PivotState.SPECIMEN;
+//                }
+//                if (gamepad2.y) {
+//                    //slides.wallIntake
+//                    endEffector.intakeWall();
+//                }
+//                else if (gamepad2.a) {
+//                    //slides.transfer
+//                    endEffector.intakeGround();
 //                }
 //                break;
 //            case SPECIMEN:

@@ -12,7 +12,7 @@ public class EndEffector {
     private final Servo wristServo;
     private final Servo clawServo;
 
-    public RunAction preSubIntake, intakeSubTeleOp, intakeSubAuto,postIntakeSub, intakeGround, scoreBucket, scoreSpecimen, transfer, openClaw, closeClaw;
+    public RunAction preSubIntake, intakeSubTeleOp, intakeSubAuto,postIntakeSub, intakeGround,intakeWall, scoreBucket, scoreSpecimen, transfer, openClaw, closeClaw;
 
     public EndEffector(HardwareMap hardwareMap) {
         armServoL = hardwareMap.get(Servo.class, "armServoL");
@@ -27,6 +27,7 @@ public class EndEffector {
         intakeSubAuto = new RunAction(this::intakeSubAuto);
         postIntakeSub = new RunAction(this::postIntakeSub);
         intakeGround = new RunAction(this::intakeGround);
+        intakeWall = new RunAction(this::intakeWall);
         scoreBucket = new RunAction(this::scoreBucket);
         scoreSpecimen = new RunAction(this::scoreSpecimen);
         transfer = new RunAction(this::transfer);
@@ -89,7 +90,6 @@ public class EndEffector {
     public void intakeSubTeleOp() {
         setArmPosition(0);
         setPivotPosition(0);
-        setWristPosition(0);
         setClawPosition(.7);
 
     }
@@ -97,22 +97,24 @@ public class EndEffector {
     public void intakeSubAuto() {
         setArmPosition(0);
         setPivotPosition(0);
-        setWristPosition(0);
+        setWristPosition(.7);
         setClawPosition(.7);
 
     }
 
     public void postIntakeSub() {
+        setArmPosition(0);
+        setPivotPosition(0);
+        setWristPosition(.5);
+        setClawPosition(.22);
+    }
 
+    public void intakeWall(){
+        setArmPosition(0);
+        setPivotPosition(0);
+        setWristPosition(0);
+    }
 
-    setArmPosition(0);
-
-    setPivotPosition(0);
-
-    setWristPosition(0);
-
-
-}
     public void intakeGround(){
         setArmPosition(0);
         setPivotPosition(0);
