@@ -3,38 +3,40 @@ package ftc1002.opmode.Tuners;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import ftc1002.config.subsystems.endEffector;
+import ftc1002.config.subsystems.EndEffector;
 
 @TeleOp(name = "Servo Tester", group = "Test")
 public class servoTester extends OpMode{
-    private endEffector endEffector;
+    private EndEffector endEffector;
     private int servoIndex = 0;
 
     public void init() {
         telemetry.addLine("Initializing...");
         telemetry.update();
 
-        endEffector = new endEffector(hardwareMap);
+        endEffector = new EndEffector(hardwareMap);
 
         telemetry.addLine();
         telemetry.update();
     }
 
     public void loop() {
-        if (gamepad1.left_bumper) {
-            decServoIndex();
-        } else if (gamepad1.right_bumper) {
-            incServoIndex();
-        }
+//        if (gamepad1.left_bumper) {
+//            decServoIndex();
+//        } else if (gamepad1.right_bumper) {
+//            incServoIndex();
+//        }
+//
+//        if (gamepad1.right_trigger > 0.5) {
+//            incServo();
+//        } else if (gamepad1.left_trigger > 0.5) {
+//            decServo();
+//        }
+//
+//        telemetry.addData(indexToServo(), indexToPos());
+//        telemetry.update();
 
-        if (gamepad1.right_trigger > 0.5) {
-            incServo();
-        } else if (gamepad1.left_trigger > 0.5) {
-            decServo();
-        }
-
-        telemetry.addData(indexToServo(), indexToPos());
-        telemetry.update();
+        endEffector.update();
 
     }
 
@@ -88,6 +90,8 @@ public class servoTester extends OpMode{
         switch (servoIndex) {
             case 0:
                 endEffector.setArmPosition(endEffector.getArmPosition() + 0.01);
+                endEffector.setArmServoRPosition(endEffector.getArmPosition() + 0.01);
+                endEffector.setArmServoLPosition(endEffector.getArmPosition()+0.01);
                 break;
             case 1:
                 endEffector.setPivotPosition(endEffector.getPivotPosition() + 0.01);
