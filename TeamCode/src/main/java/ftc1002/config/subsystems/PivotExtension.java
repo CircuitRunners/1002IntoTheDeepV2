@@ -1,8 +1,6 @@
 package ftc1002.config.subsystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,19 +10,19 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
-public class pivotExtension {
+public class PivotExtension {
     private Telemetry telemetry;
     public DcMotorEx rightLift, leftLift, pivot;
     public AnalogInput pivotEncoder;
     private PIDController liftController, pivotController;
     public static int liftTarget=0, pivotTarget=0;
-    public static double liftKP = 0.03, liftKI = 0.0, liftKD = 0, liftKF = 0.15;
-    public static double pivotKP = 0.01, pivotKI = 0, pivotKD = 0.00005, pivotKf=0.5;
+    public static double liftKP = 0.02, liftKI = 0.0, liftKD = 0.00035, liftKF = 0.15;
+    public static double pivotKP = 0.01, pivotKI = 0, pivotKD = 0.0007, pivotKf=0.5;
     public static int liftMax = 1000;
     public static int offset = 24;
-    public static int deadband = 10;
+    public static int deadband = 15;
 
-    public pivotExtension(HardwareMap hardwareMap, Telemetry telemetry) {
+    public PivotExtension(HardwareMap hardwareMap, Telemetry telemetry) {
         liftController = new PIDController(liftKP, liftKI, liftKD);
         pivotController = new PIDController(pivotKP, pivotKI, pivotKD);
         this.telemetry = telemetry;
@@ -48,10 +46,14 @@ public class pivotExtension {
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pivotTarget = (int) (Math.round(pivotEncoder.getVoltage() / 3.2 * 360) + offset) % 360;
+        liftTarget  = Math.round((float) rightLift.getCurrentPosition() / 42) * -1;
 
     }
 
     public void update() {
+        double liftPID;
+        double pivotPID;
+
         liftController.setPID(liftKP, liftKI, liftKD);
         liftController.setTolerance(deadband);
         pivotController.setPID(pivotKP, pivotKI, pivotKD);
@@ -60,8 +62,20 @@ public class pivotExtension {
         int liftPos = Math.round((float) rightLift.getCurrentPosition() / 42) * -1;
         int pivotPos = (int) (Math.round(pivotEncoder.getVoltage() / 3.2 * 360) + offset) % 360;
 
-        double liftPID = square_root(liftController.calculate(liftPos, liftTarget));
-        double pivotPID = square_root(pivotController.calculate(pivotPos, pivotTarget));
+        if (Math.abs(liftPos - liftTarget) > deadband) {
+            liftPID = square_root(liftController.calculate(liftPos, liftTarget));
+        } else {
+            liftPID = 0;
+        }
+
+        if (Math.abs(pivotPos - pivotTarget) > 2) {
+            pivotPID = square_root(pivotController.calculate(pivotPos, pivotTarget));
+        } else {
+            pivotPID = 0;
+        }
+
+
+        // double pivotPID = square_root(pivotController.calculate(pivotPos, pivotTarget));
 
         double liftFF = liftKF * Math.sin(Math.toRadians(pivotPos));
         double pivotFF = pivotKf * Math.cos(Math.toRadians(pivotPos)) * ((double) liftPos / liftMax);
@@ -88,6 +102,14 @@ public class pivotExtension {
             return Math.sqrt(input);
         } else {
             return -1 * Math.sqrt(Math.abs(input));
+        }
+    }
+
+    public boolean isAtTarget(int target) {
+        if (Math.abs((Math.round((float) rightLift.getCurrentPosition() / 42) * -1) - target) < deadband) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
