@@ -3,99 +3,145 @@ package ftc1002.config.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
 
 @Config
 public class EndEffector {
-    private final Servo armServoL, armServoR, pivotServo, wristServo, clawServo;
-    // Define a position double variable for each servo and make it public static, don't assign a value and do all the variable declarations on one line
-    public static double armPosition, pivotPosition, wristPosition, clawPosition;
 
+    // Public static variables for FTC Dashboard
+    public static double armPosition = 0.0;
+    public static double pivotPosition = 0.0;
+    public static double wristPosition = 0.0;
+    public static double clawPosition = 0.0;
 
+    // Private Servo instances
+    private final Servo armServoLeft;
+    private final Servo armServoRight;
+    private final Servo pivotServo;
+    private final Servo wristServo;
+    private final Servo clawServo;
 
+    // Constructor
     public EndEffector(HardwareMap hardwareMap) {
-        armServoL = hardwareMap.get(Servo.class, "armServoL");
-        armServoR = hardwareMap.get(Servo.class, "armServoR");
+        armServoLeft = hardwareMap.get(Servo.class, "armServoL");
+        armServoRight = hardwareMap.get(Servo.class, "armServoR");
         pivotServo = hardwareMap.get(Servo.class, "pivotServo");
         wristServo = hardwareMap.get(Servo.class, "wristServo");
         clawServo = hardwareMap.get(Servo.class, "clawServo");
     }
 
-    // Setters
+    // Public setters
     public void setArmPosition(double position) {
-        armServoL.setPosition(position);
-        armServoR.setPosition(position);
-    }
-    public void setArmServoLPosition(double position) { armServoL.setPosition(position); }
-    public void setArmServoRPosition(double position) { armServoR.setPosition(position); }
-    public void setPivotPosition(double position) { pivotServo.setPosition(position); }
-    public void setWristPosition(double position) { wristServo.setPosition(position); }
-    public void setClawPosition(double position) { clawServo.setPosition(position); }
-
-    // Getters
-    public double getArmPosition() { return armServoL.getPosition(); }
-    public double getPivotPosition() { return pivotServo.getPosition(); }
-    public double getWristPosition() { return wristServo.getPosition(); }
-    public double getClawPosition() { return clawServo.getPosition(); }
-
-    public void idle() {
-        setPositions(0.8, 0.5, 0.5);
-    }
-    public void bucketScore() {
-        setPositions(0.8, 0.4, pivotPosition);
+        armServoLeft.setPosition(position);
+        armServoRight.setPosition(position);
+        armPosition = position;
     }
 
-    public void preSubPickup() {
-       setPositions(0.75, 1, wristPosition);
+    public void setPivotPosition(double position) {
+        pivotServo.setPosition(position);
+        pivotPosition = position;
     }
 
-    public void subPickup() {
-        setPositions(0.86, 0.98, wristPosition);
+    public void setWristPosition(double position) {
+        wristServo.setPosition(position);
+        wristPosition = position;
     }
 
-    public void obsDeposit() {
-        setPositions(0.2, 0.7, pivotPosition);
+    public void setClawPosition(double position) {
+        clawServo.setPosition(position);
+        clawPosition = position;
     }
 
-    public void wallIntake(){
-        setPositions(0.5,0.5,0.5);
+    // Public getters
+    public double getArmPosition() {
+        return armServoLeft.getPosition();
     }
 
-
-
-    public void clawOpen() {
-        clawPosition = 0.7;
+    public double getPivotPosition() {
+        return pivotServo.getPosition();
     }
 
-    public void clawClose() {
-        clawPosition = 0.3;
+    public double getWristPosition() {
+        return wristServo.getPosition();
     }
 
-    public void wristincrement() {wristPosition += 0.02;}
-    public void wristdecrement() {wristPosition -= 0.02;}
-    public void pivotincrement() {pivotPosition += 0.02;}
-    public void pivotdecrement() {pivotPosition -= 0.02;}
+    public double getClawPosition() {
+        return clawServo.getPosition();
+    }
 
-    // write an update method that sets all the positions for the servo
-    public void update() {
-        armServoL.setPosition(armPosition);
-        armServoR.setPosition(armPosition);
+    // Utility methods for preset positions
+    public void setIdlePosition() {
+        setPositions(0.8, 0.4, 0.5, clawPosition);
+    }
+
+    public void setBucketScorePosition() {
+        setPositions(0.8, 0.2, pivotPosition, clawPosition);
+    }
+
+    public void setPreSubPickupPosition() {
+        setPositions(0.78, 0.9, wristPosition, clawPosition);
+    }
+
+    public void setSubPickupPosition() {
+        setPositions(0.82, 0.9, wristPosition, clawPosition);
+    }
+
+    public void setObsDepositPosition() {
+        setPositions(0.2, 0.5, 0.5, clawPosition);
+    }
+
+    public void setWallIntakePosition() {
+        setPositions(1, 0.3, 0.5, 0.7);
+    }
+
+    public void setSpecScore() {
+        setPositions(0.3, 0.4, 0.5, 0.3);
+    }
+
+    public void openClaw() {
+        setClawPosition(0.7);
+    }
+
+    public void closeClaw() {
+        setClawPosition(0.3);
+    }
+
+    // Incremental adjustments
+    public void incrementWristPosition(double step) {
+        setWristPosition(Range.clip(wristPosition + step, 0.0, 1.0));
+    }
+
+    public void decrementWristPosition(double step) {
+        setWristPosition(Range.clip(wristPosition - step, 0.0, 1.0));
+    }
+
+    public void incrementPivotPosition(double step) {
+        setPivotPosition(Range.clip(pivotPosition + step, 0.0, 1.0));
+    }
+
+    public void decrementPivotPosition(double step) {
+        setPivotPosition(Range.clip(pivotPosition - step, 0.0, 1.0));
+    }
+
+    // Update method to apply positions
+    public void init() {
+        setArmPosition(armPosition);
         setPivotPosition(pivotPosition);
         setWristPosition(wristPosition);
         setClawPosition(clawPosition);
     }
 
-    public void setPositions(double armPos, double clawPos, double pivotPos, double wristPos) {
-        armPosition = armPos;
-        wristPosition = wristPos;
-        pivotPosition = pivotPos;
-        clawPosition = clawPos;
+    // Unified setters for multiple positions
+    public void setPositions(double armPos, double pivotPos, double wristPos, double clawPos) {
+        setArmPosition(armPos);
+        setPivotPosition(pivotPos);
+        setWristPosition(wristPos);
+        setClawPosition(clawPos);
     }
 
     public void setPositions(double armPos, double pivotPos, double wristPos) {
-        armPosition = armPos;
-        wristPosition = wristPos;
-        pivotPosition = pivotPos;
+        setArmPosition(armPos);
+        setPivotPosition(pivotPos);
+        setWristPosition(wristPos);
     }
-
-
 }

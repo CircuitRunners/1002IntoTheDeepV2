@@ -2,8 +2,11 @@ package ftc1002.opmode.Auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.hardware.lynx.LynxModule;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.util.List;
 
 import ftc1002.pedroPathing.follower.Follower;
 import ftc1002.pedroPathing.localization.Pose;
@@ -12,7 +15,7 @@ import ftc1002.pedroPathing.pathGeneration.PathChain;
 import ftc1002.pedroPathing.pathGeneration.Point;
 import ftc1002.pedroPathing.util.Timer;
 
-import ftc1002.config.subsystems.PivotExtension;
+import ftc1002.config.subsystems.Deposit;
 
 @Autonomous(name = "testAuto")
 public class testAuto extends OpMode{
@@ -20,7 +23,7 @@ public class testAuto extends OpMode{
     private Follower follower;
     private Timer pathTimer;
     private int pathState;
-    private PivotExtension slides;
+    private Deposit slides;
 
     private Pose startPos = new Pose(0,0, Math.toRadians(0));
     private Pose interPos = new Pose(24, -24, Math.toRadians(90));
@@ -44,15 +47,15 @@ public class testAuto extends OpMode{
             case 0:
                 if(!follower.isBusy()) {
                     follower.followPath(path, true);
-                    PivotExtension.pivotTarget = 90;
-                    PivotExtension.liftTarget = 300;
+                    slides.setSlideTarget(300);
+                    slides.setPivotTarget(90);
                     setPathState(-1);
                 }
                 break;
             default:
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 5) {
-                    PivotExtension.pivotTarget = 45;
-                    PivotExtension.liftTarget = 500;
+                    slides.setSlideTarget(50);
+                    slides.setPivotTarget(45);
                 }
                 break;
         }
@@ -71,20 +74,20 @@ public class testAuto extends OpMode{
         telemetry.update();
 
         autonomousPathUpdate();
-//
-//        telemetry.addData("path state", pathState);
-//        telemetry.addData("x", follower.getPose().getX());
-//        telemetry.addData("y", follower.getPose().getY());
-//        telemetry.addData("heading", Math.toRadians(follower.getPose().getHeading()));
-//        telemetry.update();
     }
 
     @Override
     public void init() {
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
         pathTimer = new Timer();
 
         follower = new Follower(hardwareMap);
-        slides = new PivotExtension(hardwareMap, telemetry, true);
+        slides = new Deposit(hardwareMap, telemetry, true);
         follower.setStartingPose(startPos);
         buildPaths();
 

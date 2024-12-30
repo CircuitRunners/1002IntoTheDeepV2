@@ -1,5 +1,6 @@
 package ftc1002.opmode;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -8,10 +9,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 
+import java.util.List;
 import java.util.Locale;
 
 import ftc1002.config.subsystems.MecanumDrive;
-import ftc1002.config.subsystems.PivotExtension;
+import ftc1002.config.subsystems.Deposit;
 import ftc1002.config.subsystems.EndEffector;
 
 import ftc1002.config.util.GoBildaPinpointDriver;
@@ -20,10 +22,8 @@ import ftc1002.config.util.GoBildaPinpointDriver;
 @TeleOp(name = "Teleop", group = "Teleop")
 public class Teleop extends OpMode{
     MecanumDrive drive;
-    PivotExtension slides;
+    Deposit slides;
     EndEffector endEffector;
-
-    int pivotState = -1;
 
 
     DigitalChannel pin0;
@@ -32,11 +32,17 @@ public class Teleop extends OpMode{
 
     @Override
     public void init() {
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
         drive = new MecanumDrive();
-        slides = new PivotExtension(hardwareMap, telemetry, false);
+        slides = new Deposit(hardwareMap, telemetry, false);
         endEffector = new EndEffector(hardwareMap);
 
-        endEffector.idle();
+        endEffector.setIdlePosition();
 
         telemetry.addLine("Initializing...");
         drive.init(hardwareMap);
@@ -56,11 +62,23 @@ public class Teleop extends OpMode{
     }
 
     boolean dpadUpPressed = false;  // Tracks if the dpad_up is pressed
-    boolean dpadUpReleased = true; // Ensures dpad_up is released before detecting another press
-    int sequenceState = -1;         // Tracks the current state within the sequence
+    boolean dpadUpReleased = true; // Ensures dpad_up is released before detecting another
+    boolean dpadDownPressed = false;  // Tracks if the dpad_up is pressed
+    boolean dpadDownReleased = true; // Ensures dpad_up is released before detecting another // press
+
+    boolean dpadRightPressed = false;  // Tracks if the dpad_up is pressed
+    boolean dpadRightReleased = true; // Ensures dpad_up is released before detecting another
+    boolean dpadLeftPressed = false;  // Tracks if the dpad_up is pressed
+    boolean dpadLeftReleased = true; // Ensures dpad_up is released before detecting another // press
+    int specIntake = -1;         // Tracks the current state within the sequence
+    int specDepo = -1;
 
     @Override
     public void loop() {
+        if ((specIntake != -1) && (specDepo != -1)){
+            specIntake = -1;
+            specDepo = -1;
+        }
         double forward = -gamepad1.left_stick_y;
         double right = gamepad1.left_stick_x;
         double rotate = gamepad1.right_stick_x;
@@ -76,39 +94,72 @@ public class Teleop extends OpMode{
         }
 
         // Handle manual sequence advancement with dpad_up
-        if (gamepad1.dpad_up && dpadUpReleased) {
+        if (gamepad2.dpad_up && dpadUpReleased) {
             dpadUpPressed = true;
             dpadUpReleased = false;
-            sequenceState = (sequenceState + 1) % 7; // Advance to the next state (wraps back to 0)
+            specIntake = (specIntake + 1) % 5; // Advance to the next state (wraps back to 0)
+        }
+        if (gamepad2.dpad_down && dpadDownReleased) {
+            dpadDownPressed = true;
+            dpadDownReleased = false;
+            specIntake = (specIntake - 1) % 5;
+            endEffector.openClaw();
         }
 
-        if (gamepad1.dpad_down) {
-            sequenceState = (sequenceState - 1) % 7;
+
+
+
+        if (gamepad2.dpad_right && dpadRightReleased) {
+            dpadRightPressed = true;
+            dpadRightReleased = false;
+            specDepo = (specDepo + 1) % 3;
         }
 
-        if (!gamepad1.dpad_up) {
+
+        if (gamepad2.dpad_left && dpadLeftReleased) {
+            dpadLeftPressed = true;
+            dpadLeftReleased = false;
+            specIntake = (specDepo - 1) % 3; // Advance to the next state (wraps back to 0)
+
+        }
+
+
+
+        if (!gamepad2.dpad_up) {
             dpadUpReleased = true;
         }
 
-        if (gamepad1.left_bumper) {
-            endEffector.clawOpen();
+        if (!gamepad2.dpad_down) {
+            dpadDownReleased = true;
         }
 
-        if (gamepad1.right_bumper) {
-            endEffector.clawClose();
+        if (!gamepad2.dpad_left) {
+            dpadLeftReleased = true;
         }
 
-        if (PivotExtension.pivotTarget > 45) {
-            if (gamepad1.left_trigger > 0.5) {
-                endEffector.pivotdecrement();
-            } else if (gamepad1.right_trigger > 0.5) {
-                endEffector.pivotincrement();
+        if (!gamepad2.dpad_right) {
+            dpadRightReleased = true;
+        }
+
+        if (gamepad2.left_bumper) {
+            endEffector.openClaw();
+        }
+
+        if (gamepad2.right_bumper) {
+            endEffector.closeClaw();
+        }
+
+        if (slides.pivotTarget > 45) {
+            if (gamepad2.left_trigger > 0.5) {
+                endEffector.decrementPivotPosition(0.02);
+            } else if (gamepad2.right_trigger > 0.5) {
+                endEffector.incrementPivotPosition(0.02);
             }
         } else {
-            if (gamepad1.left_trigger > 0.5) {
-                endEffector.wristdecrement();
-            } else if (gamepad1.right_trigger > 0.5) {
-                endEffector.wristincrement();
+            if (gamepad2.left_trigger > 0.5) {
+                endEffector.decrementWristPosition(0.02);
+            } else if (gamepad2.right_trigger > 0.5) {
+                endEffector.incrementWristPosition(0.02);
             }
         }
 
@@ -116,49 +167,51 @@ public class Teleop extends OpMode{
 
 
         // State machine for manual control
-        switch (sequenceState) {
+        switch (specIntake) {
             case 0: // Set pivot to 12, extension to 50, arm idle, claw opens
-                PivotExtension.pivotTarget = 12;
-                PivotExtension.liftTarget = 50;
-                endEffector.idle();
-                endEffector.clawOpen();
+                slides.setPivotTarget(0);
+                slides.setSlideTarget(50);
+                endEffector.setIdlePosition();
+                endEffector.openClaw();
                 break;
 
             case 1: // Send lift to 500
-                PivotExtension.liftTarget = 400;
-                if (slides.isAtTarget(400)) {
-                    endEffector.preSubPickup();
+                slides.setSlideTarget(400);
+                if (slides.liftPos > 380) {
+                    endEffector.setPreSubPickupPosition();
                 }
-
-//                if (gamepad1.left_trigger > 0.5) {
-//                    endEffector.wristdecrement();
-//                } else if (gamepad1.right_trigger > 0.5) {
-//                    endEffector.wristincrement();
-//                }
                 break;
             case 2: // Call subPickup and close claw
-                endEffector.subPickup();
-                endEffector.clawClose();
+                endEffector.setSubPickupPosition();
+                endEffector.closeClaw();
                 break;
             case 3:
-                endEffector.idle();
-                PivotExtension.pivotTarget = 12;
-                PivotExtension.liftTarget = 50;
+                endEffector.setObsDepositPosition();
+                slides.setPivotTarget(12);
+                slides.setSlideTarget(50);
                 break;
             case 4:
-                PivotExtension.liftTarget = 40;
-                PivotExtension.pivotTarget = 90;
-                if (slides.isAtTarget(900)) {
-                    endEffector.bucketScore();
-                }
+                slides.setPivotTarget(90);
+            default:
                 break;
-            case 5: // Lift to 850
-                PivotExtension.liftTarget = 1015;
+        }
+
+        // State machine for manual control
+        switch (specDepo) {
+            case 0: // Set pivot to 12, extension to 50, arm idle, claw opens
+                slides.setPivotTarget(28);
+                slides.setSlideTarget(200);
+                endEffector.setIdlePosition();
+                endEffector.openClaw();
                 break;
-            case 6:
-                PivotExtension.liftTarget = 50;
-                endEffector.idle();
+
+            case 1: // Send lift to 500
+                slides.setPivotTarget(90);
+                slides.setSlideTarget(375);
+                endEffector.setSpecScore();
                 break;
+            case 2:
+                slides.setSlideTarget(850);
             default:
                 break;
         }
@@ -168,7 +221,7 @@ public class Teleop extends OpMode{
 
 
 
-        endEffector.update();
+
 
         // Debugging and telemetry
         String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.getX(DistanceUnit.MM), pos.getY(DistanceUnit.MM), pos.getHeading(AngleUnit.DEGREES));
@@ -177,7 +230,7 @@ public class Teleop extends OpMode{
         telemetry.addData("Pinpoint Frequency", pinpoint.getFrequency());
         telemetry.addData("digital 0", pin0.getState());
         telemetry.addData("digital 1", pin1.getState());
-        telemetry.addData("Sequence State", sequenceState);
+        telemetry.addData("Sequence State", specIntake);
         telemetry.update();
     }
 

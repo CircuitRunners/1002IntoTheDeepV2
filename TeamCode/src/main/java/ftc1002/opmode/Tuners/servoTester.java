@@ -36,7 +36,7 @@ public class servoTester extends OpMode{
 //        telemetry.addData(indexToServo(), indexToPos());
 //        telemetry.update();
 
-        endEffector.update();
+        endEffector.init();
 
     }
 
@@ -90,8 +90,6 @@ public class servoTester extends OpMode{
         switch (servoIndex) {
             case 0:
                 endEffector.setArmPosition(endEffector.getArmPosition() + 0.01);
-                endEffector.setArmServoRPosition(endEffector.getArmPosition() + 0.01);
-                endEffector.setArmServoLPosition(endEffector.getArmPosition()+0.01);
                 break;
             case 1:
                 endEffector.setPivotPosition(endEffector.getPivotPosition() + 0.01);
