@@ -17,10 +17,13 @@ public class Deposit {
 
     public DcMotorEx rightLift, leftLift, pivot;
     public AnalogInput pivotEncoder;
-    private static final double[] autoSlideCoefficients = {0.0125,0,0.0002, 0.0025};
-    private static final double[] autoPivotCoefficients = {0.03,0,0.001, 0.002};
-    private static final double[] teleopSlideCoefficients = {0.0125,0,0.0002, 0.0025};
-    private static final double[] teleopPivotCoefficients = {0.0125,0,0.0002, 0};
+    private static final double[] autoSlideCoefficients = {0.1,0,0.0016, 0};
+    private static final double[] autoPivotCoefficients = {0.035,0,0.001, 0.0025};
+    private static final double[] teleopSlideCoefficients = {0.1,0,0.0016, 0};
+
+    //    private static final double[] teleopSlideCoefficients = {0.0125,0,0.0002, 0.0025};
+
+    private static final double[] teleopPivotCoefficients = {0.035,0,0.001, 0.0025};
 
     private static PIDFController slidePIDF;
     private static PIDFController pivotPIDF;

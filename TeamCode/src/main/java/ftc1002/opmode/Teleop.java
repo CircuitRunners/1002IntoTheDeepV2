@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +31,8 @@ public class Teleop extends OpMode{
     DigitalChannel pin1;
     GoBildaPinpointDriver pinpoint;
 
+    ElapsedTime specIntakeTimer = new ElapsedTime();
+    int phase = 0;
     @Override
     public void init() {
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -56,9 +59,11 @@ public class Teleop extends OpMode{
         telemetry.update();
         telemetry.addLine("Ready!");
         telemetry.update();
+//
+//        pin0 = hardwareMap.digitalChannel.get("digital0");
+//        pin1 = hardwareMap.digitalChannel.get("digital1");
 
-        pin0 = hardwareMap.digitalChannel.get("digital0");
-        pin1 = hardwareMap.digitalChannel.get("digital1");
+        specIntakeTimer.reset();
     }
 
     boolean dpadUpPressed = false;  // Tracks if the dpad_up is pressed
@@ -97,12 +102,12 @@ public class Teleop extends OpMode{
         if (gamepad2.dpad_up && dpadUpReleased) {
             dpadUpPressed = true;
             dpadUpReleased = false;
-            specIntake = (specIntake + 1) % 5; // Advance to the next state (wraps back to 0)
+            specIntake = (specIntake + 1) % 4; // Advance to the next state (wraps back to 0)
         }
         if (gamepad2.dpad_down && dpadDownReleased) {
             dpadDownPressed = true;
             dpadDownReleased = false;
-            specIntake = (specIntake - 1) % 5;
+            specIntake = (specIntake - 1) % 4;
             endEffector.openClaw();
         }
 
@@ -112,14 +117,14 @@ public class Teleop extends OpMode{
         if (gamepad2.dpad_right && dpadRightReleased) {
             dpadRightPressed = true;
             dpadRightReleased = false;
-            specDepo = (specDepo + 1) % 3;
+            specDepo = (specDepo + 1) % 5;
         }
 
 
         if (gamepad2.dpad_left && dpadLeftReleased) {
             dpadLeftPressed = true;
             dpadLeftReleased = false;
-            specIntake = (specDepo - 1) % 3; // Advance to the next state (wraps back to 0)
+            specIntake = (specDepo - 1) % 5; // Advance to the next state (wraps back to 0)
 
         }
 
@@ -173,6 +178,8 @@ public class Teleop extends OpMode{
                 slides.setSlideTarget(50);
                 endEffector.setIdlePosition();
                 endEffector.openClaw();
+                specIntakeTimer.reset();
+                phase = 0;
                 break;
 
             case 1: // Send lift to 500
@@ -180,38 +187,70 @@ public class Teleop extends OpMode{
                 if (slides.liftPos > 380) {
                     endEffector.setPreSubPickupPosition();
                 }
+                specIntakeTimer.reset();
+                phase = 0;
                 break;
-            case 2: // Call subPickup and close claw
-                endEffector.setSubPickupPosition();
-                endEffector.closeClaw();
+            case 2: // Combined case for subPickup and deposit
+                switch (phase) {
+                    case 0: // SubPickup actions
+                        if (specIntakeTimer.milliseconds() == 0) {
+                            specIntakeTimer.reset(); // Start the timer
+                        }
+                        endEffector.setSubPickupPosition();
+                        endEffector.closeClaw();
+
+                        // Transition to the next phase after 100ms
+                        if (specIntakeTimer.milliseconds() >= 150) {
+                            phase = 1; // Move to the next phase
+                            specIntakeTimer.reset(); // Reset timer for the next phase
+                        }
+                        break;
+
+                    case 1: // Deposit actions
+                        endEffector.setObsDepositPosition();
+                        slides.setPivotTarget(12);
+                        slides.setSlideTarget(50);
+
+                        // Ready to go back or stay in this state
+                        break;
+                }
                 break;
-            case 3:
-                endEffector.setObsDepositPosition();
-                slides.setPivotTarget(12);
-                slides.setSlideTarget(50);
-                break;
-            case 4:
+            case 3: // Additional states if needed
                 slides.setPivotTarget(90);
+                specIntakeTimer.reset(); // Reset the timer when entering this state
+                phase = 0; // Reset phase
+                break;
             default:
+                specIntakeTimer.reset(); // Reset the timer in the default case
+                phase = 0; // Reset phase
                 break;
         }
 
         // State machine for manual control
         switch (specDepo) {
             case 0: // Set pivot to 12, extension to 50, arm idle, claw opens
-                slides.setPivotTarget(28);
-                slides.setSlideTarget(200);
-                endEffector.setIdlePosition();
+                slides.setPivotTarget(0);
+                slides.setSlideTarget(100);
+                endEffector.setWallIntakePosition();
                 endEffector.openClaw();
                 break;
 
             case 1: // Send lift to 500
                 slides.setPivotTarget(90);
-                slides.setSlideTarget(375);
                 endEffector.setSpecScore();
                 break;
             case 2:
-                slides.setSlideTarget(850);
+                slides.setSlideTarget(500);
+                break;
+            case 3:
+                slides.setSlideTarget(250);
+                if (slides.liftPos < 100) {
+                    endEffector.openClaw();
+                }
+                break;
+            case 4:
+                slides.setSlideTarget(100);
+                break;
             default:
                 break;
         }
@@ -228,8 +267,6 @@ public class Teleop extends OpMode{
         telemetry.addData("Position", data);
         telemetry.addData("Status", pinpoint.getDeviceStatus());
         telemetry.addData("Pinpoint Frequency", pinpoint.getFrequency());
-        telemetry.addData("digital 0", pin0.getState());
-        telemetry.addData("digital 1", pin1.getState());
         telemetry.addData("Sequence State", specIntake);
         telemetry.update();
     }
