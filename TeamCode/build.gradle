@@ -12,20 +12,30 @@
 // Custom definitions may go here
 
 // Include common definitions from above.
+apply from: '../build.common.gradle'
+apply from: '../build.dependencies.gradle'
+//apply plugin: 'org.team11260.fast-load-plugin'
+apply plugin: 'dev.frozenmilk.sinister.sloth.Load'
+
+
+
 buildscript {
     repositories {
         mavenCentral()
         maven {
             url = 'https://www.matthewo.tech/maven/'
         }
+        maven {
+            url "https://repo.dairy.foundation/snapshots"
+        }
+
     }
     dependencies {
-        classpath 'org.team11260:fast-load-plugin:0.1.2'
+//        classpath 'org.team11260:fast-load-plugin:0.1.2'
+        classpath "dev.frozenmilk.sinister.sloth:Load:0.0.2"
+
     }
 }
-apply from: '../build.common.gradle'
-apply from: '../build.dependencies.gradle'
-apply plugin: 'org.team11260.fast-load-plugin'
 
 
 android {
@@ -38,8 +48,13 @@ android {
 
 repositories {
     maven {
+        url "https://repo.dairy.foundation/snapshots"
+    }
+    maven {
+        url "https://repo.dairy.foundation/releases"
+    }
+    maven {
         url = 'https://www.matthewo.tech/maven/'
-
     }
     maven{
         url = 'https://maven.brott.dev/'
@@ -50,11 +65,14 @@ dependencies {
     implementation project(':FtcRobotController')
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7'
 
-    implementation 'org.team11260:fast-load:0.1.2'
-    implementation 'org.openftc:easyopencv:1.7.0'
+//    implementation 'org.team11260:fast-load:0.1.2'
+    implementation 'org.openftc:easyopencv:1.7.3'
     implementation 'org.ftclib.ftclib:core:2.1.1'
     implementation "org.apache.commons:commons-math3:3.6.1"
     implementation "com.acmerobotics.roadrunner:ftc:0.1.14"
-    implementation "org.ftclib.ftclib:core:2.0.1"
-    implementation 'org.team11260:fast-load:0.1.2'
+    implementation "org.ftclib.ftclib:core:2.1.1"
+//    implementation 'org.team11260:fast-load:0.1.2'
+    annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
+    // implementation "dev.frozenmilk:Sinister:0.0.1"
+    implementation "dev.frozenmilk.sinister:Sloth:0.0.1"
 }
