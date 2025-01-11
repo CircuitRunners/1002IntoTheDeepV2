@@ -73,31 +73,33 @@ public class EndEffector {
 
     // Utility methods for preset positions
     public void setIdlePosition() {
-        setPositions(0.45, 0.23+0.29, 0.45, clawPosition);
+        setPositions(0.53, 0.35, 0.45, clawPosition);
     }
 
     public void setBucketScorePosition() {
-        setPositions(0.55, 0.2+0.29, pivotPosition, clawPosition);
+        setPositions(0.55, 0.2+0.29-0.22, pivotPosition, clawPosition);
     }
 
     public void setPreSubPickupPosition() {
-        setPositions(0.48, 0.75, wristPosition, clawPosition);
+        setPositions(0.52, 0.6, wristPosition, clawPosition);
     }
 
     public void setSubPickupPosition() {
-        setPositions(0.42, 0.48+0.29, wristPosition, clawPosition);
+        setPositions(0.56, 0.58, wristPosition, clawPosition);
     }
 
     public void setObsDepositPosition() {
-        setPositions(0.8, 0.1+0.29, 0.45, clawPosition);
+        setPositions(0.12, 0.1+0.29-0.22, 0.45, clawPosition);
     }
 
     public void setWallIntakePosition() {
-        setPositions(0.62, 0.3+0.29, 1, 0.75);
+        setPositions(0.62, 0.35, 1, 0.75);
     }
 
+    public void setWallIntakePositionAlt() {setPositions(0.9, 0.38, 1, 0.75);}
+
     public void setSpecScore() {
-        setPositions(0.62, 0.01+0.29, 0.45, 0.95);
+        setPositions(0.4, 0.18, 0.45, 0.95);
     }
 
     public void openClaw() {

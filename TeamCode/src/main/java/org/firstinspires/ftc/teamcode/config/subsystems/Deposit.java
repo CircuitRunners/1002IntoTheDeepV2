@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.config.subsystems;
 
+import android.text.method.Touch;
+
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import com.qualcomm.robotcore.util.Range;
@@ -15,6 +18,7 @@ public class Deposit {
 
     public DcMotorEx rightLift, leftLift, pivot;
     public AnalogInput pivotEncoder;
+    public TouchSensor slideLimit;
     private static final double[] autoSlideCoefficients = {0.1,0,0.0016, 0};
     private static final double[] autoPivotCoefficients = {0.035,0,0.001, 0.0025};
     private static final double[] teleopSlideCoefficients = {0.1,0,0.0016, 0};
@@ -23,8 +27,8 @@ public class Deposit {
 
     private static final double[] teleopPivotCoefficients = {0.035,0,0.001, 0.0025};
 
-    private static PIDFController slidePIDF;
-    private static PIDFController pivotPIDF;
+    public PIDFController slidePIDF;
+    public PIDFController pivotPIDF;
     private static double slideF;
     private static double pivotF;
     public double slideTarget = 0;
@@ -35,7 +39,7 @@ public class Deposit {
     public boolean slidesRetracted;
     public double pivotPos;
     public double liftPos;
-    private boolean pidfActive = true;
+    public boolean pidfActive = true;
 
     public Deposit(HardwareMap hardwareMap, Telemetry telemetry, Boolean auto) {
         if (auto) {
@@ -52,6 +56,7 @@ public class Deposit {
 
         rightLift = hardwareMap.get(DcMotorEx.class, "rightLift");
         leftLift = hardwareMap.get(DcMotorEx.class, "leftLift");
+        slideLimit = hardwareMap.get(TouchSensor.class, "slide_limit");
 
         pivot = hardwareMap.get(DcMotorEx.class, "pivot");
         pivotEncoder = hardwareMap.get(AnalogInput.class, "pivot_enc");
@@ -69,8 +74,8 @@ public class Deposit {
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        slidePIDF.setTolerance(12, 10);
-        pivotPIDF.setTolerance(2, 2);
+        slidePIDF.setTolerance(12);
+        pivotPIDF.setTolerance(2);
         setSlideTarget(Math.round((float) rightLift.getCurrentPosition() / 42) * -1);
         setPivotTarget((int) (Math.round(pivotEncoder.getVoltage() / 3.2 * 360) + 24) % 360);
     }
@@ -106,13 +111,28 @@ public class Deposit {
             liftPower += 0.6;
         }
 
-        if (slidesRetracted) {
-            rightLift.setPower(0);
-            leftLift.setPower(0);
+        if (pidfActive) {
+            if (slidesRetracted) {
+                rightLift.setPower(0);
+                leftLift.setPower(0);
+            } else {
+                rightLift.setPower(liftPower);
+                leftLift.setPower(liftPower);
+            }
         } else {
-            rightLift.setPower(liftPower);
-            leftLift.setPower(liftPower);
+            if (slideLimit.isPressed()) {
+                rightLift.setPower(0);
+                leftLift.setPower(0);
+                rightLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                slidePIDF.reset();
+                pidfActive = true;
+            } else {
+                rightLift.setPower(-0.4);
+                leftLift.setPower(-0.4);
+            }
         }
+
+
 
         pivot.setPower(pivotPower);
     }

@@ -24,7 +24,7 @@ public class DepositTuner extends OpMode {
 
     public static int liftSetPoint = 0;
     public static int pivotSetPoint = 0;
-    public static double maxPowerConstant = 1.0;
+    public static double maxPowerConstant = 1.03;
     private static final PIDFController slidePIDF = new PIDFController(liftP,liftI,liftD, liftF);
     private static final PIDFController pivotPIDF = new PIDFController(pivotP,pivotI,pivotD, pivotF);
     public ElapsedTime timer = new ElapsedTime();
@@ -49,20 +49,20 @@ public class DepositTuner extends OpMode {
         pivot = hardwareMap.get(DcMotorEx.class, "pivot");
         pivotEncoder = hardwareMap.get(AnalogInput.class, "pivot_enc");
 
-        leftLift.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightLift.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftLift.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightLift.setDirection(DcMotorSimple.Direction.REVERSE);
         rightLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         leftLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        pivot.setDirection(DcMotorSimple.Direction.REVERSE);
+        pivot.setDirection(DcMotorSimple.Direction.FORWARD);
         pivot.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        slidePIDF.setTolerance(12, 10);
-        pivotPIDF.setTolerance(2, 2);
+        slidePIDF.setTolerance(12);
+        pivotPIDF.setTolerance(2);
 
         telemetry.addData("lift position", liftPos);
         telemetry.addData("lift set point", liftSetPoint);
@@ -87,22 +87,26 @@ public class DepositTuner extends OpMode {
         slidePIDF.setSetPoint(liftSetPoint);
         pivotPIDF.setSetPoint(pivotSetPoint);
 
-        double liftMaxPower = (liftF * liftPos) + maxPowerConstant;
+        double liftMaxPower = maxPowerConstant;
         double liftPower = Range.clip(slidePIDF.calculate(liftPos, liftSetPoint), -liftMaxPower, liftMaxPower);
 
-        double pivotMaxPower = (pivotF * pivotPos) + maxPowerConstant;
+        double pivotMaxPower = maxPowerConstant;
         double pivotPower = Range.clip(pivotPIDF.calculate(pivotPos, pivotSetPoint), -pivotMaxPower, pivotMaxPower);
 
+        // liftPower = (liftPower / Math.abs(liftPower)) * Math.sqrt(Math.abs(liftPower));
         rightLift.setPower(liftPower);
         leftLift.setPower(liftPower);
+
+       // pivotPower = (pivotPower / Math.abs(pivotPower)) * Math.sqrt(Math.abs(pivotPower));
+
         pivot.setPower(pivotPower);
 
         telemetry.addData("lift position", liftPos);
         telemetry.addData("lift set point", liftSetPoint);
         telemetry.addData("pivot position", pivotPos);
         telemetry.addData("pivot set point", pivotSetPoint);
-        telemetry.addData("lift max power", (liftF * liftPos) + maxPowerConstant);
-        telemetry.addData("pivot max power", (pivotF * pivotPos) + maxPowerConstant);
+        telemetry.addData("lift power", liftPower);
+        telemetry.addData("pivot power", pivotPower);
         telemetry.addData("loop time (ms)", timer.milliseconds());
 
         telemetry.update();

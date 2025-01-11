@@ -96,6 +96,17 @@ public class Teleop extends OpMode {
         if (currentGamepad1.triangle) {
             pinpoint.recalibrateIMU();
         }
+        // Circle button logic
+        boolean circleJustPressed = currentGamepad1.circle && !previousGamepad1.circle;
+        boolean circleReleased = !currentGamepad1.circle && previousGamepad1.circle;
+        if (circleJustPressed) {
+            endEffector.setIdlePosition();
+            intakeState = -1;
+            depositState = -1;
+            slides.pidfActive = false;
+            slides.setPivotTarget(90);
+            slides.setSlideTarget(0);
+        }
 
 
         //------------------------------------------
@@ -111,9 +122,7 @@ public class Teleop extends OpMode {
         boolean rightTriggerJustPressed =
                 (currentGamepad1.right_trigger > 0.5f) && (previousGamepad1.right_trigger <= 0.5f);
 
-        // Circle button logic
-        boolean circleJustPressed = currentGamepad1.circle && !previousGamepad1.circle;
-        boolean circleReleased = !currentGamepad1.circle && previousGamepad1.circle;
+
 
 //        if (circleJustPressed) {
 //            // Stop PIDF control
@@ -278,31 +287,29 @@ public class Teleop extends OpMode {
         //------------------------------------------
         switch (depositState) {
             case 0:
-                slides.setPivotTarget(0);
-                slides.setSlideTarget(75);
-                endEffector.setWallIntakePosition();
+                slides.setPivotTarget(90);
+                slides.setSlideTarget(0);
+                endEffector.setWallIntakePositionAlt();
                 endEffector.openClaw();
                 break;
 
             case 1:
-                slides.setPivotTarget(90);
+                endEffector.closeClaw();
+                break;
+            case 2:
                 endEffector.setSpecScore();
                 break;
 
-            case 2:
-                slides.setSlideTarget(500);
+            case 3:
+                slides.setSlideTarget(400);
                 break;
 
-            case 3:
+            case 4:
                 slides.setSlideTarget(230);
                 if (slides.liftPos < 250) {
                     endEffector.openClaw();
                     depositState = 4;
                 }
-                break;
-
-            case 4:
-                slides.setSlideTarget(100);
                 break;
             default:
                 // do nothing
@@ -326,6 +333,10 @@ public class Teleop extends OpMode {
         telemetry.addData("Pinpoint Frequency", pinpoint.getFrequency());
         telemetry.addData("Intake State", intakeState);
         telemetry.addData("Deposit State", depositState);
+        telemetry.addData("At set point", slides.slidesReached);
+        telemetry.addData("Lift Pos", slides.liftPos);
+        telemetry.addData("Lift Target", slides.slidePIDF.getSetPoint());
+        telemetry.addData("Error", slides.slidePIDF.getPositionError());
         telemetry.update();
     }
 

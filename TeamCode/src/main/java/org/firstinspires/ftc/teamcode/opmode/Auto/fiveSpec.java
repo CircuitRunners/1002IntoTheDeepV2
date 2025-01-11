@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.List;
 
+import org.firstinspires.ftc.teamcode.config.subsystems.Deposit;
+import org.firstinspires.ftc.teamcode.config.subsystems.EndEffector;
 import org.firstinspires.ftc.teamcode.pedroPathing.follower.Follower;
 import org.firstinspires.ftc.teamcode.pedroPathing.localization.Pose;
 import org.firstinspires.ftc.teamcode.pedroPathing.pathGeneration.BezierCurve;
@@ -20,29 +22,12 @@ public class fiveSpec extends OpMode {
     private ElapsedTime timer = new ElapsedTime();
     private Follower follower;
     private Timer pathTimer;
+    private EndEffector endEffector;
+    private Deposit deposit;
     private int pathState;
 
-    // Remove or comment out old pose references if they are not used anywhere else:
-    // private Pose startPos = new Pose(0,0, Math.toRadians(0));
-    // private Pose interPos = new Pose(24, -24, Math.toRadians(90));
-    // private Pose endPos = new Pose(24, 24, Math.toRadians(45));
-    private PathChain preload;
-    private PathChain pushSample1Path;
-    private PathChain pushSample2Path;
+    private PathChain preload, pushSample1Path, pushSample2Path, pushSample3Path, score1, return1, score2, return2, score3, return3, score4, return4;
    private Pose startingPose =  new Pose   (7, 65, Math.toRadians(0));
-   private Pose subPose =  new Pose   (35, 65, Math.toRadians(0));
-    private Pose behindSample1ControlPoint1 = new Pose(1.4,30,Math.toRadians(0));
-    private Pose behindSample1ControlPoint2 = new Pose(82,45,Math.toRadians(0)); // x og 102
-   private Pose behindSample1 = new Pose (53,23,Math.toRadians(0)); // x og 53
-
-   private Pose pushSample1 = new Pose (25, 23, Math.toRadians(0));
-
-   private Pose behindSample2ControlPoint = new Pose(91,24,Math.toRadians(0));
-   private Pose behindSample2 = new Pose (54,12,Math.toRadians(0));
-   private Pose pushSample2 = new Pose (7, 12, Math.toRadians(0));
-   private Pose behindSample3ControlPoint = new Pose(100,13,Math.toRadians(0));
-   private Pose behindSample3 = new Pose (53,3,Math.toRadians(0));
-   private Pose pushSample3 = new Pose (7, 3, Math.toRadians(0));
 
 
     /**
@@ -50,33 +35,62 @@ public class fiveSpec extends OpMode {
      * that were in the GeneratedPath constructor.
      */
     public void buildPaths() {
-        // Build your path exactly as in your GeneratedPath class:
+        // Preload path (Line 1)
         preload = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(startingPose), new Point(subPose)))
-                .setLinearHeadingInterpolation(startingPose.getHeading(), subPose.getHeading())
+                .addPath(new BezierLine(
+                        new Point(new Pose(7.338, 65.859, Math.toRadians(0))),
+                        new Point(new Pose(40, 65.859, Math.toRadians(0)))))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
+
+        // Push Sample 1 Path (Lines 2 and 3)
         pushSample1Path = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(subPose), new Point(behindSample1ControlPoint1), new Point(behindSample1ControlPoint2), new Point(behindSample1)))
-                .setLinearHeadingInterpolation(subPose.getHeading(), behindSample1.getHeading())
-                .addPath(new BezierLine(new Point(behindSample1), new Point(pushSample1)))
-                .setLinearHeadingInterpolation(behindSample1.getHeading(), pushSample1.getHeading())
-              //  .addPath(new BezierCurve(new Point(pushSample1), new Point(behindSample2ControlPoint), new Point(behindSample2)))
-               // .setLinearHeadingInterpolation(pushSample1.getHeading(), behindSample2.getHeading())
-//                .addPath(new BezierLine(new Point(behindSample2), new Point(pushSample2)))
-//                .setLinearHeadingInterpolation(behindSample2.getHeading(), pushSample2.getHeading())
-//                .addPath(new BezierCurve(new Point(pushSample2), new Point(behindSample3ControlPoint), new Point(behindSample3)))
-//                .setLinearHeadingInterpolation(pushSample2.getHeading(), behindSample3.getHeading())
-//                .addPath(new BezierLine(new Point(behindSample3), new Point(pushSample3)))
-//                .setLinearHeadingInterpolation(behindSample3.getHeading(), pushSample3.getHeading())
+                .addPath(new BezierCurve(
+                        new Point(new Pose(40.000, 65.859, Math.toRadians(0))),
+                        new Point(new Pose(34.000, 67.000, Math.toRadians(0))),
+                        new Point(new Pose(0.000, 48.000, Math.toRadians(0))),
+                        new Point(new Pose(55, 30.000, Math.toRadians(0)))))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .addPath(new BezierCurve(
+                        new Point(new Pose(55, 30.000, Math.toRadians(0))),
+                        new Point(new Pose(65.000, 20.000, Math.toRadians(0))),
+                        new Point(new Pose(13.250, 24.000, Math.toRadians(0)))))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 
+        // Push Sample 2 Path (Lines 4 and 5)
         pushSample2Path = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(pushSample1), new Point(behindSample2ControlPoint), new Point(behindSample2)))
-                 .setLinearHeadingInterpolation(pushSample1.getHeading(), behindSample2.getHeading())
-                .addPath(new BezierLine(new Point(behindSample2), new Point(pushSample2)))
-                .setLinearHeadingInterpolation(behindSample2.getHeading(), pushSample2.getHeading())
+                .addPath(new BezierCurve(
+                        new Point(new Pose(13.250, 24.000, Math.toRadians(0))),
+                        new Point(new Pose(65.000, 22.000, Math.toRadians(0))),
+                        new Point(new Pose(55, 12.500, Math.toRadians(0)))))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .addPath(new BezierLine(
+                        new Point(new Pose(55, 12.500, Math.toRadians(0))),
+                        new Point(new Pose(13.250, 12.500, Math.toRadians(0)))))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
                 .build();
 
+        // Push Sample 3 Path (Lines 6 and 7)
+        pushSample3Path = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(new Pose(13.250, 12.500, Math.toRadians(0))),
+                        new Point(new Pose(65.000, 16.250, Math.toRadians(0))),
+                        new Point(new Pose(50, 8, Math.toRadians(0)))))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .addPath(new BezierLine(
+                        new Point(new Pose(50, 8, Math.toRadians(0))),
+                        new Point(new Pose(8.5, 8, Math.toRadians(0)))))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .build();
+        score1 = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Point(new Pose(8.5, 8, Math.toRadians(0))),
+                        new Point(new Pose(36, 24, Math.toRadians(0))),
+                        new Point(new Pose(12, 48, Math.toRadians(0))),
+                        new Point(new Pose(40, 68, Math.toRadians(0)))))
+                .setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                .build();
     }
 
     public void autonomousPathUpdate() {
@@ -85,19 +99,69 @@ public class fiveSpec extends OpMode {
                 if(!follower.isBusy()) {
                     // Start following our newly built path
                     follower.followPath(preload, true);
-                    setPathState(1);
+
+                }
+
+                if (pathTimer.getElapsedTimeSeconds() > 0.2 && pathTimer.getElapsedTimeSeconds() < 1.5) {
+                    deposit.setSlideTarget(500);
+                }
+
+                if (pathTimer.getElapsedTimeSeconds() > 1.5) {
+                    deposit.setSlideTarget(230);
+                    if (deposit.liftPos < 250) {
+                        endEffector.openClaw();
+                        setPathState(1);
+                    }
                 }
                 break;
             case 1:
-                if (!follower.isBusy()) {
-                    follower.followPath(pushSample1Path,true);
+                if (!follower.isBusy() && pathTimer.getElapsedTime() > 5) {
+                    deposit.setSlideTarget(0);
+                    deposit.setPivotTarget(90);
+                    endEffector.setWallIntakePositionAlt();
+                    follower.followPath(pushSample1Path,false);
                     setPathState(2);
             }
                 break;
             case 2:
                 if(!follower.isBusy()) {
                     follower.followPath(pushSample2Path, false);
-                    setPathState(-1);
+                    setPathState(3);
+                }
+                break;
+            case 3:
+                if(!follower.isBusy()) {
+                    follower.followPath(pushSample3Path, true);
+                    setPathState(4);
+                }
+                break;
+            case 4:
+                if (!follower.isBusy()) {
+                    endEffector.closeClaw();
+                    setPathState(5);
+                }
+                break;
+            case 5:
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 0.5) {
+                    follower.followPath(score1, true);
+                }
+
+                if (pathTimer.getElapsedTimeSeconds() > 0.3 && pathTimer.getElapsedTimeSeconds() < 1) {
+                    endEffector.setSpecScore();
+                    deposit.setSlideTarget(100);
+                }
+
+
+                if (pathTimer.getElapsedTimeSeconds() > 1.2 && pathTimer.getElapsedTimeSeconds() < 2.5) {
+                    deposit.setSlideTarget(430);
+                }
+
+                if (pathTimer.getElapsedTimeSeconds() > 3) {
+                    deposit.setSlideTarget(230);
+                    if (deposit.liftPos < 250) {
+                        endEffector.openClaw();
+                        setPathState(-1);
+                    }
                 }
                 break;
             default:
@@ -116,8 +180,13 @@ public class fiveSpec extends OpMode {
         telemetry.addData("X Pos", follower.getPose().getX());
         telemetry.addData("Y Pos", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.addData("Path State", pathState);
+        telemetry.addData("Path Timer", pathTimer.getElapsedTimeSeconds());
+
 
         telemetry.update();
+
+        deposit.update();
 
         autonomousPathUpdate();
     }
@@ -138,6 +207,12 @@ public class fiveSpec extends OpMode {
         // follower.setStartingPose(new Pose(0,0, 0));
         follower.setStartingPose(startingPose);
 
+        deposit = new Deposit(hardwareMap, telemetry, true);
+        endEffector = new EndEffector(hardwareMap);
+
+        endEffector.setSpecScore();
+        deposit.setPivotTarget(90);
+        deposit.setSlideTarget(50);
 
         // Build our newly incorporated multi-step path:
         buildPaths();
