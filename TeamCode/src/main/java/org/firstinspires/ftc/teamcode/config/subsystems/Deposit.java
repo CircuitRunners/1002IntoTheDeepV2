@@ -19,7 +19,7 @@ public class Deposit {
     public DcMotorEx rightLift, leftLift, pivot;
     public AnalogInput pivotEncoder;
     public TouchSensor slideLimit;
-    private static final double[] autoSlideCoefficients = {0.1,0,0.0016, 0};
+    private static final double[] autoSlideCoefficients = {0.08,0,0.0016, 0};
     private static final double[] autoPivotCoefficients = {0.035,0,0.001, 0.0025};
     private static final double[] teleopSlideCoefficients = {0.1,0,0.0016, 0};
 
@@ -98,7 +98,7 @@ public class Deposit {
         slidePIDF.setF(slideF * Math.sin(Math.toRadians(pivotPos)));
         double liftPower = slidePIDF.calculate(liftPos, slideTarget);
         slidesReached = slidePIDF.atSetPoint() || (liftPos >= slideTarget && slideTarget == 1050);
-        slidesRetracted = (slideTarget <= 0) && slidesReached;
+        slidesRetracted = slideTarget <= 0 && slideLimit.isPressed();
 
         pivotPIDF.setF(pivotF * Math.cos(Math.toRadians(pivotPos)) * ((double) liftPos / 1100));
         double pivotPower = pivotPIDF.calculate(pivotPos, pivotTarget);

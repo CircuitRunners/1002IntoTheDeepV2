@@ -301,7 +301,7 @@ public class Teleop extends OpMode {
                 break;
 
             case 3:
-                slides.setSlideTarget(400);
+                slides.setSlideTarget(475);
                 break;
 
             case 4:
